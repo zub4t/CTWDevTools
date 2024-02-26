@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Launcher</title>
+    <!-- Include Ace Editor from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+    <div id="editor" style="height: 95vh; width: 90vw; position: absolute; right: 10px;">
+
+/*
+*  EXMAPLE OF THE MOST BASIC POSSIBLE EDITOR
+*
+*/
+
+plugins {
+    `java-library`
+    id("application")
+    alias(libs.plugins.shadow)
+}
+
+dependencies {
+    implementation(libs.edc.boot)
+    implementation(libs.edc.connector.core)
+}
+
+application {
+    mainClass.set("org.eclipse.edc.boot.system.runtime.BaseRuntime")
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    mergeServiceFiles()
+    archiveFileName.set("basic-connector.jar")
+}
+    
+    
+    </div>
+    
+    
+    <button onclick="submitCode()">Submit Code</button>
+
+    <script>
+        var editor = ace.edit("editor");
+        editor.setTheme("ace/theme/monokai");
+        // Set mode to Kotlin for build.gradle.kts files
+        editor.session.setMode("ace/mode/kotlin");
+
+        function submitCode() {
+            var code = editor.getValue();
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/process_code", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    if(response.status === 'success') {
+                        // Handle the case where the JAR file is successfully created
+                        alert('JAR file created successfully!');
+                        // You can also include a link or a method to download the JAR file
+                    } else {
+                        // Handle any errors
+                        alert('Error: ' + response.message);
+                    }
+                }
+            };
+            xhr.send(JSON.stringify({code: code}));
+    }
+    </script>
+</body>
+</html>
